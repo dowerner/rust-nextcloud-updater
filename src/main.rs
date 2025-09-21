@@ -1,3 +1,6 @@
+mod desktop;
+use std::path::{Path, PathBuf};
+
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const NAME: &str = env!("CARGO_PKG_NAME");
 
@@ -113,7 +116,56 @@ async fn fetch_versions(all: bool) -> Result<Vec<String>, Box<dyn std::error::Er
     }
 }
 
-fn status() {}
+fn applications_dir() -> Option<PathBuf> {
+    let home_dir = std::env::home_dir();
+    if home_dir.is_none() {
+        return None;
+    }
+
+    let home = home_dir.unwrap();
+    let applications_dir = home
+        .as_path()
+        .join(".local")
+        .join("share")
+        .join("applications");
+
+    if !applications_dir.is_dir() {
+        return None;
+    }
+
+    Some(applications_dir)
+}
+
+fn nextcloud_desktop_file() -> Option<PathBuf> {
+    match applications_dir() {
+        Some(app_dir) => {
+            let file = app_dir.join("nextcloud.desktop");
+            if file.is_file() { Some(file) } else { None }
+        }
+        None => None,
+    }
+}
+
+// fn nextcloud_app_folder() -> Option<PathBuf> {
+
+// }
+
+fn status() {
+    let nextcloud_desktop_file = nextcloud_desktop_file();
+    if nextcloud_desktop_file.is_none() {
+        println!("Did not find existing nextcloud.desktop file.");
+        return;
+    }
+
+    let desktop_file = nextcloud_desktop_file.unwrap();
+    println!(
+        "Found existing app configuration: {}",
+        desktop_file.display()
+    );
+
+    let test = desktop::DesktopFile::from_file(desktop_file).unwrap();
+    println!("{}", test.icon);
+}
 
 fn install() {}
 
