@@ -59,7 +59,7 @@ fn help() {
     println!(
         "  install [version]   Installs the Nextcloud desktop client if not already installed"
     );
-    println!("  update [allow-rc]   Updates to the latest Nextcloud desktop client");
+    println!("  update [version]    Updates to the latest Nextcloud desktop client or the version specified");
 }
 
 fn version() {
