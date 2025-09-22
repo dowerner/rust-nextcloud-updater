@@ -1,10 +1,10 @@
 use std::{
     fs::File,
-    io::{self, BufRead, Read},
+    io::{self, BufRead},
     path::{Path, PathBuf},
 };
 
-use tokio::fs::read;
+use std::io::Write;
 
 #[derive(Debug)]
 pub struct DesktopFile {
@@ -17,6 +17,24 @@ pub struct DesktopFile {
 }
 
 impl DesktopFile {
+    pub fn new(
+        name: String,
+        exec: String,
+        icon: String,
+        terminal: bool,
+        app_type: String,
+        categories: String,
+    ) -> Self {
+        return Self {
+            name: name,
+            exec: exec,
+            icon: icon,
+            terminal: terminal,
+            app_type: app_type,
+            categories: categories,
+        };
+    }
+
     pub fn from_file(path: PathBuf) -> Option<Self> {
         let mut name = "".to_string();
         let mut exec = "".to_string();
@@ -73,8 +91,22 @@ impl DesktopFile {
         }
     }
 
-    pub fn to_string(&self) -> &str {
-        self.name.as_str()
+    pub fn save(&self, path: PathBuf) -> std::io::Result<()> {
+        // Build the desktop entry as a single String
+        let content = format!(
+            "[Desktop Entry]\nName={}\nExec={}\nIcon={}\nTerminal={}\nType={}\nCategories={}\n",
+            self.name,
+            self.exec,
+            self.icon,
+            if self.terminal { "true" } else { "false" },
+            self.app_type,
+            self.categories
+        );
+
+        let mut file = File::create(path)?;
+        file.write_all(content.as_bytes())?;
+
+        Ok(())
     }
 }
 
